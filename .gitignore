@@ -1,0 +1,10 @@
+# This is where the result of the go build goes
+/bin
+
+# Go test binaries
+*.test
+
+# Godeps or dep workspace
+/Godeps/_workspace
+vendor
+vendor.*

@@ -1,0 +1,27 @@
+ARG RCLONE_VERSION=1.53
+ARG S3FS_VERSION=1.86
+
+# it works only on amd64. To support ARM we must build it hard
+FROM efrecon/s3fs:$S3FS_VERSION as bin-s3fs
+FROM rclone/rclone:$RCLONE_VERSION  as bin-rclone
+
+FROM alpine:3.12
+LABEL maintainers="Mykola Grechukh <mgrechukh@satelliz.com>"
+LABEL description="csi-s3 minimalistic alpine image"
+
+RUN apk --no-cache add \
+    ca-certificates \
+    fuse \
+    libxml2 \
+    libcurl \
+    libgcc \
+    libstdc++
+
+COPY --from=bin-s3fs /usr/bin/s3fs /usr/bin/s3fs
+RUN /usr/bin/s3fs --version
+
+COPY --from=bin-rclone /usr/local/bin/rclone /usr/local/bin/rclone
+RUN /usr/local/bin/rclone --version
+
+COPY ./bin/s3driver /s3driver
+ENTRYPOINT ["/s3driver"]
