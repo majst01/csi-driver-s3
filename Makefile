@@ -18,8 +18,6 @@ REGISTRY_NAME=ghcr.io
 IMAGE_NAME=majst01/csi-s3
 VERSION ?= dev
 IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
-FULL_IMAGE_TAG=$(IMAGE_TAG)-full
-MICRO_IMAGE_TAG=$(IMAGE_TAG)
 TEST_IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):test
 
 build: bin/s3driver
@@ -31,21 +29,12 @@ bin/s3driver: pkg/s3/*.go cmd/s3driver/*.go
 test:
 	docker build -t $(TEST_IMAGE_TAG) -f test/Dockerfile .
 	docker run --rm --privileged -v $(PWD):$(PROJECT_DIR) --device /dev/fuse $(TEST_IMAGE_TAG)
-container: build
-	docker build -t $(IMAGE_TAG) -f cmd/s3driver/Dockerfile .
-	docker build -t $(FULL_IMAGE_TAG) --build-arg VERSION=$(VERSION) -f cmd/s3driver/Dockerfile.full .
-push: container
-	docker push $(IMAGE_TAG)
-	docker push $(FULL_IMAGE_TAG)
 clean:
 	go clean -r -x
 	-rm -rf bin
 	
-container_micro: cmd/s3driver/Dockerfile.micro bin/s3driver
-	docker build -t $(MICRO_IMAGE_TAG) --build-arg VERSION=$(VERSION) -f $< .
+container: Dockerfile
+	docker build -t $(IMAGE_TAG) --build-arg VERSION=$(VERSION) -f $< .
 
-push_micro: container_micro
-	docker push $(MICRO_IMAGE_TAG)
-
-push: build push_micro push_full push_std
-container: build container_std container_full container_micro
+push: container
+	docker push $(IMAGE_TAG)
