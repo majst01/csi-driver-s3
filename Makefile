@@ -16,8 +16,8 @@
 PROJECT_DIR=/app
 REGISTRY_NAME=ghcr.io
 IMAGE_NAME=majst01/csi-s3
-VERSION ?= dev
-IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
+GITHUB_TAG_NAME ?= dev
+IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(GITHUB_TAG_NAME)
 TEST_IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):test
 
 build: bin/s3driver
@@ -33,8 +33,8 @@ clean:
 	go clean -r -x
 	-rm -rf bin
 	
-container: Dockerfile
+dockerimage: Dockerfile
 	docker build -t $(IMAGE_TAG) --build-arg VERSION=$(VERSION) -f $< .
 
-push: container
+dockerpush: dockerimage
 	docker push $(IMAGE_TAG)

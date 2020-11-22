@@ -1,0 +1,23 @@
+name: Docker Image from master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Docker Login
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ secrets.DOCKER_REGISTRY }}
+        username: ${{ secrets.DOCKER_REGISTRY_USER }}
+        password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+    - name: Build the Docker images
+      run: |
+        export GITHUB_TAG_NAME=${GITHUB_HEAD_REF##*/}
+        make dockerimage
+        make dockerpush
