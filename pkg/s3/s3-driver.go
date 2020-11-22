@@ -40,7 +40,7 @@ type s3Volume struct {
 }
 
 var (
-	vendorVersion = "v0.1.0"
+	vendorVersion = "v0.1.1"
 	driverName    = "s3.csi.metal-stack.io"
 )
 
