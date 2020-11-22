@@ -14,7 +14,7 @@
 .PHONY: test build container push clean
 
 PROJECT_DIR=/app
-REGISTRY_NAME=ghcr.io
+REGISTRY_NAME=docker.io
 IMAGE_NAME=majst01/csi-s3
 DOCKER_TAG := $(or ${GITHUB_TAG_NAME}, latest)
 IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(DOCKER_TAG)
