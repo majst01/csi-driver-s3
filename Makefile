@@ -34,7 +34,7 @@ clean:
 	-rm -rf bin
 	
 dockerimage: Dockerfile
-	docker build -t $(IMAGE_TAG) --build-arg VERSION=$(VERSION) -f $< .
+	docker build -t $(IMAGE_TAG)  .
 
 dockerpush: dockerimage
 	docker push $(IMAGE_TAG)
