@@ -81,7 +81,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: ghcr.io/majst01/csi-s3:v1.1.1
+          image: ghcr.io/majst01/csi-s3:v0.1.0
           args:
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--nodeid=$(NODE_ID)"
