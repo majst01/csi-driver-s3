@@ -22,6 +22,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: csi-driver-s3-secret
+  namespace: kube-system
 stringData:
   accessKeyID: <YOUR_ACCESS_KEY_ID>
   secretAccessKey: <YOUR_SECRET_ACCES_KEY>
