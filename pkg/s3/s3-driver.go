@@ -21,6 +21,7 @@ import (
 	"k8s.io/klog/v2"
 
 	csicommon "github.com/kubernetes-csi/drivers/pkg/csi-common"
+	"github.com/metal-stack/v"
 )
 
 type S3Driver struct {
@@ -40,13 +41,12 @@ type s3Volume struct {
 }
 
 var (
-	vendorVersion = "v0.1.1"
-	driverName    = "s3.csi.metal-stack.io"
+	driverName = "s3.csi.metal-stack.io"
 )
 
 // New initializes the driver
 func New(nodeID string, endpoint string) (*S3Driver, error) {
-	driver := csicommon.NewCSIDriver(driverName, vendorVersion, nodeID)
+	driver := csicommon.NewCSIDriver(driverName, v.Version, nodeID)
 	if driver == nil {
 		klog.Fatalln("Failed to initialize CSI Driver.")
 	}
@@ -79,7 +79,7 @@ func (s3 *S3Driver) newNodeServer(d *csicommon.CSIDriver) *nodeServer {
 // Run the driver
 func (s3 *S3Driver) Run() {
 	klog.Infof("Driver: %v ", driverName)
-	klog.Infof("Version: %v ", vendorVersion)
+	klog.Infof("Version: %v ", v.V)
 	// Initialize default library driver
 
 	s3.driver.AddControllerServiceCapabilities([]csi.ControllerServiceCapability_RPC_Type{csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME})

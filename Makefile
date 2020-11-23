@@ -20,10 +20,21 @@ DOCKER_TAG := $(or ${GITHUB_TAG_NAME}, latest)
 IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(DOCKER_TAG)
 TEST_IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):test
 
+SHA := $(shell git rev-parse --short=8 HEAD)
+GITVERSION := $(shell git describe --long --all)
+BUILDDATE := $(shell date -Iseconds)
+VERSION := $(or ${DOCKER_TAG},devel)
+
 build: bin/s3driver
 
 bin/s3driver: pkg/s3/*.go cmd/s3driver/*.go
-	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o $@ ./cmd/s3driver
+	CGO_ENABLED=0 GOOS=linux \
+	go build -a -ldflags "-extldflags '-static' \
+								   -X 'github.com/metal-stack/v.Version=$(VERSION)' \
+								   -X 'github.com/metal-stack/v.Revision=$(GITVERSION)' \
+								   -X 'github.com/metal-stack/v.GitSHA1=$(SHA)' \
+								   -X 'github.com/metal-stack/v.BuildDate=$(BUILDDATE)'" \
+			-o $@ ./cmd/s3driver
 	strip bin/s3driver
 
 test:
