@@ -1,7 +1,4 @@
-FROM ghcr.io/majst01/csi-s3:dev-full
-LABEL maintainers="Cyrill Troxler <cyrilltroxler@gmail.com>"
-LABEL description="csi-s3 testing image"
-
+FROM ghcr.io/majst01/csi-driver-s3:dev-full
 RUN apt-get update && \
   apt-get install -y \
   git wget make && \

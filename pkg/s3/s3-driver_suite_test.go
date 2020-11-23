@@ -14,7 +14,7 @@ import (
 var _ = Describe("S3Driver", func() {
 
 	Context("s3fs", func() {
-		socket := "/tmp/csi-s3fs.sock"
+		socket := "/tmp/csi-driver-s3fs.sock"
 		csiEndpoint := "unix://" + socket
 		if err := os.Remove(socket); err != nil && !os.IsNotExist(err) {
 			Expect(err).NotTo(HaveOccurred())

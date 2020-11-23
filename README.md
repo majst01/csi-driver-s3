@@ -21,7 +21,7 @@ This is still very experimental and should not be used in any production environ
 apiVersion: v1
 kind: Secret
 metadata:
-  name: csi-s3-secret
+  name: csi-driver-s3-secret
 stringData:
   accessKeyID: <YOUR_ACCESS_KEY_ID>
   secretAccessKey: <YOUR_SECRET_ACCES_KEY>
@@ -41,7 +41,7 @@ kubectl apply -f deploy/kubernetes
 
 ### Test the S3 driver
 
-Create a pvc
+Create a PVC
 
 ```bash
 kubectl apply -f deploy/sample/pod.yaml
@@ -50,9 +50,9 @@ kubectl apply -f deploy/sample/pod.yaml
 Check if the PVC has been bound:
 
 ```bash
-$ kubectl get pvc csi-s3-pvc
-NAME         STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-csi-s3-pvc   Bound     pvc-c5d4634f-8507-11e8-9f33-0e243832354b   5Gi        RWO            csi-s3         9s
+$ kubectl get pvc csi-driver-s3-pvc
+NAME                STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+csi-driver-s3-pvc   Bound     pvc-c5d4634f-8507-11e8-9f33-0e243832354b   5Gi        RWO            csi-driver-s3         9s
 ```
 
 Create a test pod which mounts your volume:
@@ -66,7 +66,7 @@ If the pod can start, everything should be working.
 Test the mount
 
 ```bash
-$ kubectl exec -ti csi-s3-test-nginx bash
+$ kubectl exec -ti csi-driver-s3-test-nginx bash
 $ mount | grep fuse
 s3fs on /var/lib/www/html type fuse.s3fs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)
 $ touch /var/lib/www/html/hello_world
@@ -78,7 +78,7 @@ If something does not work as expected, check the troubleshooting section below.
 
 ### Mounter
 
-As S3 is not a real file system there are some limitations to consider here. Depending on what mounter you are using, you will have different levels of POSIX compability. Also depending on what S3 storage backend you are using there are not always [consistency guarantees](https://github.com/gaul/are-we-consistent-yet#observed-consistency).
+As S3 is not a real file system there are some limitations to consider here. Depending on what mounter you are using, you will have different levels of POSIX compatibility. Also depending on what S3 storage backend you are using there are not always [consistency guarantees](https://github.com/gaul/are-we-consistent-yet#observed-consistency).
 
 The driver can be configured to use one of these mounters to mount buckets:
 
@@ -107,7 +107,7 @@ All mounters have different strengths and weaknesses depending on your use case.
 Check the logs of the provisioner:
 
 ```bash
-kubectl logs -l app=csi-provisioner-s3 -c csi-s3
+kubectl logs -l app=csi-provisioner-s3 -c csi-driver-s3
 ```
 
 ### Issues creating containers
@@ -116,7 +116,7 @@ kubectl logs -l app=csi-provisioner-s3 -c csi-s3
 2. Check the logs of the s3-driver:
 
 ```bash
-kubectl logs -l app=csi-s3 -c csi-s3
+kubectl logs -l app=csi-driver-s3 -c csi-driver-s3
 ```
 
 ## Development

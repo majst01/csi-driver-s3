@@ -83,8 +83,8 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/kubelet/plugins/s3.csi.metal-stack.io
-        - name: csi-s3
-          image: majst01/csi-s3:v0.1.1
+        - name: csi-driver-s3
+          image: majst01/csi-driver-s3:v0.1.1
           args:
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--nodeid=$(NODE_ID)"
