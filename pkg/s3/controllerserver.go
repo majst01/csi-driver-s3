@@ -60,7 +60,7 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 	params := req.GetParameters()
 	mounter := params[mounterTypeKey]
 
-	klog.V(4).Infof("Got a request to create volume %s", volumeID)
+	klog.Infof("Got a request to create volume %s", volumeID)
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	if err != nil {
@@ -99,9 +99,6 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 	}
 
 	klog.V(4).Infof("create volume %s", volumeID)
-	s3Vol := s3Volume{}
-	s3Vol.VolName = volumeID
-	s3Vol.VolID = volumeID
 	return &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
 			VolumeId:      volumeID,
@@ -120,10 +117,10 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 	}
 
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {
-		klog.V(3).Infof("Invalid delete volume req: %v", req)
+		klog.Errorf("Invalid delete volume req: %v", req)
 		return nil, err
 	}
-	klog.V(4).Infof("Deleting volume %s", volumeID)
+	klog.Infof("Deleting volume %s", volumeID)
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	if err != nil {
@@ -135,7 +132,7 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 	}
 	if exists {
 		if err := s3.removeBucket(volumeID); err != nil {
-			klog.V(3).Infof("Failed to remove volume %s: %v", volumeID, err)
+			klog.Errorf("Failed to remove volume %s: %v", volumeID, err)
 			return nil, err
 		}
 	} else {

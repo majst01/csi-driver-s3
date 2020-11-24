@@ -24,7 +24,7 @@ import (
 	"github.com/metal-stack/v"
 )
 
-type S3Driver struct {
+type driver struct {
 	driver   *csicommon.CSIDriver
 	endpoint string
 
@@ -33,51 +33,44 @@ type S3Driver struct {
 	cs  *controllerServer
 }
 
-type s3Volume struct {
-	VolName string `json:"volName"`
-	VolID   string `json:"volID"`
-	VolSize int64  `json:"volSize"`
-	VolPath string `json:"volPath"`
-}
-
 var (
 	driverName = "s3.csi.metal-stack.io"
 )
 
 // New initializes the driver
-func New(nodeID string, endpoint string) (*S3Driver, error) {
-	driver := csicommon.NewCSIDriver(driverName, v.Version, nodeID)
-	if driver == nil {
+func New(nodeID string, endpoint string) (*driver, error) {
+	drv := csicommon.NewCSIDriver(driverName, v.Version, nodeID)
+	if drv == nil {
 		klog.Fatalln("Failed to initialize CSI Driver.")
 	}
 
-	s3d := &S3Driver{
+	s3d := &driver{
 		endpoint: endpoint,
-		driver:   driver,
+		driver:   drv,
 	}
 	return s3d, nil
 }
 
-func (s3 *S3Driver) newIdentityServer(d *csicommon.CSIDriver) *identityServer {
+func (s3 *driver) newIdentityServer(d *csicommon.CSIDriver) *identityServer {
 	return &identityServer{
 		DefaultIdentityServer: csicommon.NewDefaultIdentityServer(d),
 	}
 }
 
-func (s3 *S3Driver) newControllerServer(d *csicommon.CSIDriver) *controllerServer {
+func (s3 *driver) newControllerServer(d *csicommon.CSIDriver) *controllerServer {
 	return &controllerServer{
 		DefaultControllerServer: csicommon.NewDefaultControllerServer(d),
 	}
 }
 
-func (s3 *S3Driver) newNodeServer(d *csicommon.CSIDriver) *nodeServer {
+func (s3 *driver) newNodeServer(d *csicommon.CSIDriver) *nodeServer {
 	return &nodeServer{
 		DefaultNodeServer: csicommon.NewDefaultNodeServer(d),
 	}
 }
 
 // Run the driver
-func (s3 *S3Driver) Run() {
+func (s3 *driver) Run() {
 	klog.Infof("Driver: %v ", driverName)
 	klog.Infof("Version: %v ", v.V)
 	// Initialize default library driver

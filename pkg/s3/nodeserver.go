@@ -70,7 +70,7 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 	attrib := req.GetVolumeContext()
 	mountFlags := req.GetVolumeCapability().GetMount().GetMountFlags()
 
-	klog.V(4).Infof("target %v\ndevice %v\nreadonly %v\nvolumeId %v\nattributes %v\nmountflags %v\n",
+	klog.Infof("target:%v device:%v readonly:%v volumeId:%v attributes:%v mountflags:%v",
 		targetPath, deviceID, readOnly, volumeID, attrib, mountFlags)
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
@@ -90,7 +90,7 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 		return nil, err
 	}
 
-	klog.V(4).Infof("s3: bucket %s successfuly mounted to %s", b.Name, targetPath)
+	klog.Infof("s3 bucket %q successfully mounted to %q", b.Name, targetPath)
 
 	return &csi.NodePublishVolumeResponse{}, nil
 }
@@ -110,9 +110,9 @@ func (ns *nodeServer) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpu
 	cmd := exec.Command("umount", "--lazy", "--force", targetPath)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("unable to umount %s output:%s err:%v", targetPath, string(out), err))
+		return nil, status.Error(codes.Internal, fmt.Sprintf("unable to umount %q output:%s err:%v", targetPath, string(out), err))
 	}
-	klog.V(4).Infof("s3: bucket %s has been unmounted.", volumeID)
+	klog.Infof("s3 bucket %q has been unmounted.", volumeID)
 
 	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
@@ -136,11 +136,11 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 
 	err := os.MkdirAll(stagingTargetPath, 0777)
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("unable to create mkdir directory for  err:%v", err))
+		return nil, status.Error(codes.Internal, fmt.Sprintf("unable to create mkdir directory for %q err:%v", stagingTargetPath, err))
 	}
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize S3 client: %s", err)
+		return nil, fmt.Errorf("failed to initialize s3 client: %v", err)
 	}
 	b, err := s3.getBucket(volumeID)
 	if err != nil {
