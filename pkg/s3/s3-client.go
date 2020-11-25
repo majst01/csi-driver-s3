@@ -31,14 +31,18 @@ type bucket struct {
 }
 
 func newS3Client(cfg *Config) (*s3Client, error) {
-	var client = &s3Client{}
+	client := &s3Client{
+		cfg: cfg,
+	}
 
-	client.cfg = cfg
 	u, err := url.Parse(client.cfg.Endpoint)
 	if err != nil {
 		return nil, err
 	}
-	ssl := u.Scheme == "https"
+	var ssl bool
+	if u.Scheme == "https" {
+		ssl = true
+	}
 	endpoint := u.Hostname()
 	if u.Port() != "" {
 		endpoint = u.Hostname() + ":" + u.Port()
@@ -141,17 +145,17 @@ func (client *s3Client) getBucket(bucketName string) (*bucket, error) {
 	opts := minio.GetObjectOptions{}
 	obj, err := client.minio.GetObject(context.Background(), bucketName, metadataName, opts)
 	if err != nil {
-		return &bucket{}, err
+		return nil, err
 	}
 	objInfo, err := obj.Stat()
 	if err != nil {
-		return &bucket{}, err
+		return nil, err
 	}
 	b := make([]byte, objInfo.Size)
 	_, err = obj.Read(b)
 
 	if err != nil && err != io.EOF {
-		return &bucket{}, err
+		return nil, err
 	}
 	var meta bucket
 	err = json.Unmarshal(b, &meta)

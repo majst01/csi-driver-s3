@@ -44,7 +44,7 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 	volumeID := sanitizeVolumeID(req.GetName())
 
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {
-		klog.V(3).Infof("invalid create volume req: %v", req)
+		klog.Infof("invalid create volume req: %v", req)
 		return nil, err
 	}
 
@@ -98,7 +98,7 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 		return nil, fmt.Errorf("Error setting bucket metadata: %v", err)
 	}
 
-	klog.V(4).Infof("create volume %s", volumeID)
+	klog.Infof("create volume %s", volumeID)
 	return &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
 			VolumeId:      volumeID,
@@ -136,7 +136,7 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 			return nil, err
 		}
 	} else {
-		klog.V(5).Infof("Bucket %s does not exist, ignoring request", volumeID)
+		klog.Infof("Bucket %s does not exist, ignoring request", volumeID)
 	}
 
 	return &csi.DeleteVolumeResponse{}, nil
