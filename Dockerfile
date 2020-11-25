@@ -2,7 +2,7 @@ FROM efrecon/s3fs:1.86 as bin-s3fs
 FROM rclone/rclone:1.53  as bin-rclone
 
 FROM golang:1.15-alpine as builder
-RUN apk add make binutils
+RUN apk add git make binutils
 COPY / /work
 WORKDIR /work
 RUN make
@@ -14,7 +14,8 @@ RUN apk --no-cache add \
     libxml2 \
     libcurl \
     libgcc \
-    libstdc++
+    libstdc++ \
+    util-linux
 COPY --from=bin-s3fs /usr/bin/s3fs /usr/bin/s3fs
 RUN /usr/bin/s3fs --version
 COPY --from=bin-rclone /usr/local/bin/rclone /usr/local/bin/rclone

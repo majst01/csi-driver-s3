@@ -51,9 +51,10 @@ kubectl apply -f deploy/sample/pod.yaml
 Check if the PVC has been bound:
 
 ```bash
-$ kubectl get pvc csi-driver-s3-pvc
-NAME                STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-csi-driver-s3-pvc   Bound     pvc-c5d4634f-8507-11e8-9f33-0e243832354b   5Gi        RWO            csi-driver-s3         9s
+$ kubectl get pvc
+NAME                       STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          AGE
+csi-driver-s3-rclone-pvc   Bound     pvc-c5d4634f-8507-11e8-9f33-0e243832354b   5Gi        RWO            csi-driver-s3-rclone  9s
+csi-driver-s3-s3fs-pvc     Bound     pvc-c5d4634f-8507-11e8-9f33-0e243832354b   5Gi        RWO            csi-driver-s3-s3fs    9s
 ```
 
 Create a test pod which mounts your volume:
@@ -67,7 +68,7 @@ If the pod can start, everything should be working.
 Test the mount
 
 ```bash
-$ kubectl exec -ti csi-driver-s3-test-nginx bash
+$ kubectl exec -ti csi-driver-s3-rclone-test-nginx bash
 $ mount | grep fuse
 s3fs on /var/lib/www/html type fuse.s3fs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)
 $ touch /var/lib/www/html/hello_world

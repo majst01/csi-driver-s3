@@ -13,6 +13,10 @@ spec:
     rule: RunAsAny
   supplementalGroups:
     rule: RunAsAny
+  hostNetwork: true
+  allowedHostPaths: []
+  allowedCapabilities:
+    - "SYS_ADMIN"
   volumes:
   - '*'
 ---
