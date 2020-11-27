@@ -12,7 +12,7 @@ This is still very experimental and should not be used in any production environ
 
 * Kubernetes 1.16+ (CSI v1.0.0 compatibility)
 * Kubernetes has to allow privileged containers
-* Docker daemon must allow shared mounts (systemd flag `MountFlags=shared`)
+* Docker daemon must allow shared mounts (Systemd flag `MountFlags=shared`)
 
 ### Create a secret with your S3 credentials
 
@@ -45,7 +45,7 @@ kubectl apply -f deploy/kubernetes
 Create a PVC
 
 ```bash
-kubectl apply -f deploy/sample/pod.yaml
+kubectl apply -f deploy/sample/pvc.yaml
 ```
 
 Check if the PVC has been bound:
@@ -81,7 +81,7 @@ If something does not work as expected, check the troubleshooting section below.
 
 As S3 is not a real file system there are some limitations to consider here. Depending on what mounter you are using, you will have different levels of POSIX compatibility. Also depending on what S3 storage backend you are using there are not always [consistency guarantees](https://github.com/gaul/are-we-consistent-yet#observed-consistency).
 
-The csi-driver-s3 uses s3fs to mount the bucket into the pvc.
+The csi-driver-s3 uses s3fs to mount the bucket into the PVC.
 
 #### s3fs
 
