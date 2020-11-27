@@ -52,9 +52,8 @@ Check if the PVC has been bound:
 
 ```bash
 $ kubectl get pvc
-NAME                       STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          AGE
-csi-driver-s3-rclone-pvc   Bound     pvc-c5d4634f-8507-11e8-9f33-0e243832354b   5Gi        RWO            csi-driver-s3-rclone  9s
-csi-driver-s3-s3fs-pvc     Bound     pvc-c5d4634f-8507-11e8-9f33-0e243832354b   5Gi        RWO            csi-driver-s3-s3fs    9s
+NAME                STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+csi-driver-s3-pvc   Bound     pvc-c5d4634f-8507-11e8-9f33-0e243832354b   5Gi        RWO            csi-driver-s3  9s
 ```
 
 Create a test pod which mounts your volume:
@@ -68,7 +67,7 @@ If the pod can start, everything should be working.
 Test the mount
 
 ```bash
-$ kubectl exec -ti csi-driver-s3-rclone-test-nginx bash
+$ kubectl exec -ti csi-driver-s3-test-nginx bash
 $ mount | grep fuse
 s3fs on /var/lib/www/html type fuse.s3fs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)
 $ touch /var/lib/www/html/hello_world
@@ -82,25 +81,14 @@ If something does not work as expected, check the troubleshooting section below.
 
 As S3 is not a real file system there are some limitations to consider here. Depending on what mounter you are using, you will have different levels of POSIX compatibility. Also depending on what S3 storage backend you are using there are not always [consistency guarantees](https://github.com/gaul/are-we-consistent-yet#observed-consistency).
 
-The driver can be configured to use one of these mounters to mount buckets:
-
-* [rclone](https://rclone.org/commands/rclone_mount)
-* [s3fs](https://github.com/s3fs-fuse/s3fs-fuse)
-
-The mounter can be set as a parameter in the storage class. You can also create multiple storage classes for each mounter if you like.
-
-All mounters have different strengths and weaknesses depending on your use case. Here are some characteristics which should help you choose a mounter:
-
-#### rclone
-
-* Almost full POSIX compatibility (depends on caching mode)
-* Files can be viewed normally with any S3 client
+The csi-driver-s3 uses s3fs to mount the bucket into the pvc.
 
 #### s3fs
 
 * Large subset of POSIX
 * Files can be viewed normally with any S3 client
 * Does not support appends or random writes
+* [s3fs](https://github.com/s3fs-fuse/s3fs-fuse)
 
 ## Troubleshooting
 

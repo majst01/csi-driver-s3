@@ -39,30 +39,4 @@ var _ = Describe("S3Driver", func() {
 		})
 	})
 
-	Context("rclone", func() {
-		socket := "/tmp/csi-rclone.sock"
-		csiEndpoint := "unix://" + socket
-
-		if err := os.Remove(socket); err != nil && !os.IsNotExist(err) {
-			Expect(err).NotTo(HaveOccurred())
-		}
-		driver, err := s3.New("test-node", csiEndpoint)
-		if err != nil {
-			log.Fatal(err)
-		}
-		go driver.Run()
-
-		Describe("CSI sanity", func() {
-			sanityCfg := &sanity.Config{
-				TargetPath:  os.TempDir() + "/rclone-target",
-				StagingPath: os.TempDir() + "/rclone-staging",
-				Address:     csiEndpoint,
-				SecretsFile: "../../test/secret.yaml",
-				TestVolumeParameters: map[string]string{
-					"mounter": "rclone",
-				},
-			}
-			sanity.GinkgoTest(sanityCfg)
-		})
-	})
 })

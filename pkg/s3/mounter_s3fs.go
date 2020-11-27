@@ -3,6 +3,9 @@ package s3
 import (
 	"fmt"
 	"os"
+	"os/exec"
+
+	"k8s.io/klog/v2"
 )
 
 // Implements Mounter
@@ -61,5 +64,17 @@ func writes3fsPass(pwFileContent string) error {
 		return err
 	}
 	pwFile.Close()
+	return nil
+}
+
+func fuseMount(path string, command string, args []string) error {
+	cmd := exec.Command(command, args...)
+	klog.Infof("Mounting fuse with command: %s and args: %s", command, args)
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("Error fuseMount command: %s\nargs: %s\noutput: %s", command, args, out)
+	}
+
 	return nil
 }

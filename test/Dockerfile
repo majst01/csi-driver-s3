@@ -1,12 +1,10 @@
-FROM ghcr.io/majst01/csi-driver-s3:dev-full
-RUN apt-get update && \
-  apt-get install -y \
-  git wget make && \
-  rm -rf /var/lib/apt/lists/*
+FROM majst01/csi-driver-s3:latest
+RUN apk add \
+  git wget make
 
-RUN wget -q https://dl.google.com/go/go1.12.5.linux-amd64.tar.gz && \
-  tar -xf go1.12.5.linux-amd64.tar.gz && \
-  rm go1.12.5.linux-amd64.tar.gz && \
+RUN wget -q https://dl.google.com/go/go1.15.5.linux-amd64.tar.gz && \
+  tar -xf go1.15.5.linux-amd64.tar.gz && \
+  rm go1.15.5.linux-amd64.tar.gz && \
   mv go /usr/local
 
 ENV GOROOT /usr/local/go

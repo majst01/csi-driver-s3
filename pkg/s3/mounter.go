@@ -1,12 +1,5 @@
 package s3
 
-import (
-	"fmt"
-	"os/exec"
-
-	"k8s.io/klog/v2"
-)
-
 // Mounter interface which can be implemented
 // by the different mounter types
 type Mounter interface {
@@ -16,9 +9,8 @@ type Mounter interface {
 }
 
 const (
-	s3fsMounterType   = "s3fs"
-	rcloneMounterType = "rclone"
-	mounterTypeKey    = "mounter"
+	s3fsMounterType = "s3fs"
+	mounterTypeKey  = "mounter"
 )
 
 // newMounter returns a new mounter depending on the mounterType parameter
@@ -31,21 +23,7 @@ func newMounter(bucket *bucket, cfg *Config) (Mounter, error) {
 	switch mounter {
 	case s3fsMounterType:
 		return newS3fsMounter(bucket, cfg)
-	case rcloneMounterType:
-		return newRcloneMounter(bucket, cfg)
 	default:
-		return newRcloneMounter(bucket, cfg)
+		return newS3fsMounter(bucket, cfg)
 	}
-}
-
-func fuseMount(path string, command string, args []string) error {
-	cmd := exec.Command(command, args...)
-	klog.Infof("Mounting fuse with command: %s and args: %s", command, args)
-
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("Error fuseMount command: %s\nargs: %s\noutput: %s", command, args, out)
-	}
-
-	return nil
 }
