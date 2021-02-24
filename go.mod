@@ -3,11 +3,8 @@ module github.com/majst01/csi-driver-s3
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.2.0
-	github.com/aws/aws-sdk-go-v2/config v1.1.1
-	github.com/aws/aws-sdk-go-v2/credentials v1.1.1
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.2.0
 	github.com/container-storage-interface/spec v1.3.0
+	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/kubernetes-csi/csi-lib-utils v0.9.1 // indirect
 	github.com/kubernetes-csi/csi-test v2.2.0+incompatible
 	github.com/kubernetes-csi/drivers v1.0.2

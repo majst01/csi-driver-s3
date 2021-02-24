@@ -101,7 +101,16 @@ func (client *s3Client) createBucket(bucketName string) error {
 }
 
 func (client *s3Client) createPrefix(bucketName string, prefix string) error {
-	_, err := client.minio.PutObject(context.Background(), bucketName, prefix+"/", bytes.NewReader([]byte("")), 0, minio.PutObjectOptions{})
+	_, err := client.minio.PutObject(
+		context.Background(),
+		bucketName,
+		prefix+"/",
+		bytes.NewReader([]byte("")),
+		0,
+		minio.PutObjectOptions{
+			DisableMultipart: true,
+			UserMetadata:     map[string]string{"createdby": "csi-driver-s3"},
+		})
 	if err != nil {
 		return err
 	}
