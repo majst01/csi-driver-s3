@@ -75,7 +75,7 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize S3 client: %s", err)
+		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
 	}
 	b, err := s3.getBucket(volumeID)
 	if err != nil {
@@ -140,7 +140,7 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 	}
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize s3 client: %v", err)
+		return nil, fmt.Errorf("failed to initialize s3 client: %w", err)
 	}
 	b, err := s3.getBucket(volumeID)
 	if err != nil {
