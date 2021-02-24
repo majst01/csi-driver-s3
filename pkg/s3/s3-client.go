@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -77,6 +78,26 @@ func (client *s3Client) bucketExists(bucketName string) (bool, error) {
 
 func (client *s3Client) createBucket(bucketName string) error {
 	return client.minio.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{Region: client.cfg.Region})
+	// policy := fmt.Sprintf(`
+	// {
+	// 	"Id": "ReadBucket",
+	// 	"Version": "2012-10-17",
+	// 	"Statement": [
+	// 	  {
+	// 		"Sid": "",
+	// 		"Action": "s3:*",
+	// 		"Effect": "Allow",
+	// 		"Resource": "arn:aws:s3:::%s/*",
+	// 		"Principal": {
+	// 		  "AWS": [
+	// 			"*"
+	// 		  ]
+	// 		}
+	// 	  }
+	// 	]
+	//   }
+	// `, bucketName)
+	// return client.minio.SetBucketPolicy(context.Background(), bucketName, policy)
 }
 
 func (client *s3Client) createPrefix(bucketName string, prefix string) error {
@@ -154,7 +175,7 @@ func (client *s3Client) getBucket(bucketName string) (*bucket, error) {
 	b := make([]byte, objInfo.Size)
 	_, err = obj.Read(b)
 
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, err
 	}
 	var meta bucket
