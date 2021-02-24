@@ -2,9 +2,9 @@ FROM majst01/csi-driver-s3:latest
 RUN apk add \
   git wget make
 
-RUN wget -q https://dl.google.com/go/go1.15.5.linux-amd64.tar.gz && \
-  tar -xf go1.15.5.linux-amd64.tar.gz && \
-  rm go1.15.5.linux-amd64.tar.gz && \
+RUN wget -q https://dl.google.com/go/go1.16.linux-amd64.tar.gz && \
+  tar -xf go1.16.linux-amd64.tar.gz && \
+  rm go1.16.linux-amd64.tar.gz && \
   mv go /usr/local
 
 ENV GOROOT /usr/local/go

@@ -17,7 +17,7 @@ limitations under the License.
 package s3
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -64,17 +64,17 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize S3 client: %s", err)
+		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
 	}
 	exists, err := s3.bucketExists(volumeID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check if bucket %s exists: %v", volumeID, err)
+		return nil, fmt.Errorf("failed to check if bucket %s exists: %w", volumeID, err)
 	}
 	if exists {
 		var b *bucket
 		b, err = s3.getBucket(volumeID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get bucket metadata of bucket %s: %v", volumeID, err)
+			return nil, fmt.Errorf("failed to get bucket metadata of bucket %s: %w", volumeID, err)
 		}
 		// Check if volume capacity requested is bigger than the already existing capacity
 		if capacityBytes > b.CapacityBytes {
@@ -82,10 +82,10 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 		}
 	} else {
 		if err = s3.createBucket(volumeID); err != nil {
-			return nil, fmt.Errorf("failed to create volume %s: %v", volumeID, err)
+			return nil, fmt.Errorf("failed to create volume %s: %w", volumeID, err)
 		}
 		if err = s3.createPrefix(volumeID, fsPrefix); err != nil {
-			return nil, fmt.Errorf("failed to create prefix %s: %v", fsPrefix, err)
+			return nil, fmt.Errorf("failed to create prefix %s: %w", fsPrefix, err)
 		}
 	}
 	b := &bucket{
@@ -95,7 +95,7 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 		FSPath:        fsPrefix,
 	}
 	if err := s3.setBucket(b); err != nil {
-		return nil, fmt.Errorf("Error setting bucket metadata: %v", err)
+		return nil, fmt.Errorf("Error setting bucket metadata: %w", err)
 	}
 
 	klog.Infof("create volume %s", volumeID)
@@ -124,7 +124,7 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize S3 client: %s", err)
+		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
 	}
 	exists, err := s3.bucketExists(volumeID)
 	if err != nil {
@@ -132,7 +132,7 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 	}
 	if exists {
 		if err := s3.removeBucket(volumeID); err != nil {
-			klog.Errorf("Failed to remove volume %s: %v", volumeID, err)
+			klog.Errorf("Failed to remove volume %s: %w", volumeID, err)
 			return nil, err
 		}
 	} else {
@@ -154,7 +154,7 @@ func (cs *controllerServer) ValidateVolumeCapabilities(ctx context.Context, req 
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize S3 client: %s", err)
+		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
 	}
 	exists, err := s3.bucketExists(req.GetVolumeId())
 	if err != nil {
@@ -194,7 +194,7 @@ func (cs *controllerServer) ControllerExpandVolume(ctx context.Context, req *csi
 func sanitizeVolumeID(volumeID string) string {
 	volumeID = strings.ToLower(volumeID)
 	if len(volumeID) > 63 {
-		h := sha1.New()
+		h := sha256.New()
 		_, _ = io.WriteString(h, volumeID)
 		volumeID = hex.EncodeToString(h.Sum(nil))
 	}
