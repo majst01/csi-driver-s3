@@ -41,7 +41,7 @@ func (cs *controllerServer) ControllerGetVolume(ctx context.Context, req *csi.Co
 }
 
 func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest) (*csi.CreateVolumeResponse, error) {
-	volumeID := sanitizeVolumeID(req.GetName())
+	volumeID := req.GetName()
 
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {
 		klog.Infof("invalid create volume req: %v", req)
@@ -87,17 +87,16 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 		if err = s3.createPrefix(volumeID, fsPrefix); err != nil {
 			return nil, fmt.Errorf("failed to create prefix %s: %w", fsPrefix, err)
 		}
+		b := &bucket{
+			Name:          volumeID,
+			Mounter:       mounter,
+			CapacityBytes: capacityBytes,
+			FSPath:        fsPrefix,
+		}
+		if err := s3.setBucket(b); err != nil {
+			return nil, fmt.Errorf("Error setting bucket metadata: %w", err)
+		}
 	}
-	b := &bucket{
-		Name:          volumeID,
-		Mounter:       mounter,
-		CapacityBytes: capacityBytes,
-		FSPath:        fsPrefix,
-	}
-	if err := s3.setBucket(b); err != nil {
-		return nil, fmt.Errorf("Error setting bucket metadata: %w", err)
-	}
-
 	klog.Infof("create volume %s", volumeID)
 	return &csi.CreateVolumeResponse{
 		Volume: &csi.Volume{
