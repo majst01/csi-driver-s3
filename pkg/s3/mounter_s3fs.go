@@ -69,11 +69,12 @@ func writes3fsPass(pwFileContent string) error {
 
 func fuseMount(path string, command string, args []string) error {
 	cmd := exec.Command(command, args...)
-	klog.Infof("Mounting fuse with command: %s and args: %s", command, args)
+	klog.Infof("mounting fuse with command:%s with args:%s", command, args)
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("Error fuseMount command: %s\nargs: %s\noutput: %s", command, args, out)
+		klog.Errorf("mounting fuse with command:%s with args:%s error:%s", command, args, string(out))
+		return fmt.Errorf("fuseMount command:%s with args:%s error:%s", command, args, string(out))
 	}
 
 	return nil
