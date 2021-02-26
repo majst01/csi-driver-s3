@@ -39,6 +39,7 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 	volumeID := req.GetVolumeId()
 	targetPath := req.GetTargetPath()
 	stagingTargetPath := req.GetStagingTargetPath()
+	klog.Infof("publish volume volumeId:%v  target:%v staging:%v", volumeID, targetPath, stagingTargetPath)
 
 	// Check arguments
 	if req.GetVolumeCapability() == nil {
@@ -54,9 +55,20 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 		return nil, status.Error(codes.InvalidArgument, "Target path missing in request")
 	}
 
-	err := os.MkdirAll(stagingTargetPath, 0777)
-	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("unable to create mkdir directory for  err:%v", err))
+	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
+		klog.Infof("target directory %s does not exist creating...", targetPath)
+		err := os.MkdirAll(targetPath, 0777)
+		if err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("unable to create mkdir directory for  err:%v", err))
+		}
+	}
+
+	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
+		klog.Infof("staging directory %s does not exist creating...", stagingTargetPath)
+		err = os.MkdirAll(stagingTargetPath, 0777)
+		if err != nil {
+			return nil, status.Error(codes.Internal, fmt.Sprintf("unable to create mkdir directory for  err:%v", err))
+		}
 	}
 
 	deviceID := ""
@@ -77,20 +89,17 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
 	}
-	b, err := s3.getBucket(volumeID)
+	meta, err := s3.getMetadata(volumeID)
 	if err != nil {
 		return nil, err
 	}
 
-	mounter, err := newMounter(b, s3.cfg)
-	if err != nil {
-		return nil, err
-	}
+	mounter := newMounter(meta, s3.cfg)
 	if err := mounter.Mount(stagingTargetPath, targetPath); err != nil {
 		return nil, err
 	}
 
-	klog.Infof("s3 bucket %q successfully mounted to %q", b.Name, targetPath)
+	klog.Infof("s3 bucket %q successfully mounted to %q", meta.Name, targetPath)
 
 	return &csi.NodePublishVolumeResponse{}, nil
 }
@@ -98,6 +107,7 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 func (ns *nodeServer) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublishVolumeRequest) (*csi.NodeUnpublishVolumeResponse, error) {
 	volumeID := req.GetVolumeId()
 	targetPath := req.GetTargetPath()
+	klog.Infof("unpublish volume volumeId:%v  target:%v", volumeID, targetPath)
 
 	// Check arguments
 	if len(volumeID) == 0 {
@@ -120,6 +130,7 @@ func (ns *nodeServer) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpu
 func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRequest) (*csi.NodeStageVolumeResponse, error) {
 	volumeID := req.GetVolumeId()
 	stagingTargetPath := req.GetStagingTargetPath()
+	klog.Infof("stage volume volumeId:%v stage:%v", volumeID, stagingTargetPath)
 
 	// Check arguments
 	if len(volumeID) == 0 {
@@ -142,14 +153,11 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize s3 client: %w", err)
 	}
-	b, err := s3.getBucket(volumeID)
+	meta, err := s3.getMetadata(volumeID)
 	if err != nil {
 		return nil, err
 	}
-	mounter, err := newMounter(b, s3.cfg)
-	if err != nil {
-		return nil, err
-	}
+	mounter := newMounter(meta, s3.cfg)
 	if err := mounter.Stage(stagingTargetPath); err != nil {
 		return nil, err
 	}
@@ -160,6 +168,7 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 func (ns *nodeServer) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {
 	volumeID := req.GetVolumeId()
 	stagingTargetPath := req.GetStagingTargetPath()
+	klog.Infof("unstage volume volumeId:%v stage:%v", volumeID, stagingTargetPath)
 
 	// Check arguments
 	if len(volumeID) == 0 {

@@ -77,11 +77,12 @@ spec:
               mountPath: /registration/
         - name: csi-driver-s3
           securityContext:
+            runAsUser: 0
             privileged: true
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: majst01/csi-driver-s3:v0.3.1
+          image: majst01/csi-driver-s3:v0.3.2
           args:
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--nodeid=$(NODE_ID)"
@@ -100,6 +101,9 @@ spec:
             - name: pods-mount-dir
               mountPath: /var/lib/kubelet/pods
               mountPropagation: "Bidirectional"
+            - name: plugins-mount-dir
+              mountPath: /var/lib/kubelet/plugins
+              mountPropagation: "Bidirectional"
             - name: fuse-device
               mountPath: /dev/fuse
       volumes:
@@ -114,6 +118,10 @@ spec:
         - name: pods-mount-dir
           hostPath:
             path: /var/lib/kubelet/pods
+            type: Directory
+        - name: plugins-mount-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins
             type: Directory
         - name: fuse-device
           hostPath:

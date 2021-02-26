@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	metadataName = ".metadata.json"
+	metadataName = "metadata.json"
 	fsPrefix     = "csi-fs"
 )
 
@@ -24,9 +24,8 @@ type s3Client struct {
 	minio *minio.Client
 }
 
-type bucket struct {
+type metadata struct {
 	Name          string
-	Mounter       string
 	FSPath        string
 	CapacityBytes int64
 }
@@ -145,33 +144,48 @@ func (client *s3Client) emptyBucket(bucketName string) error {
 		return listErr
 	}
 
-	select {
-	default:
-		errorCh := client.minio.RemoveObjects(context.Background(), bucketName, objectsCh, minio.RemoveObjectsOptions{})
-		for e := range errorCh {
-			klog.Errorf("Failed to remove object %q, error:%v", e.ObjectName, e.Err)
-		}
-		if len(errorCh) != 0 {
-			return fmt.Errorf("Failed to remove all objects of bucket %s", bucketName)
-		}
+	errorCh := client.minio.RemoveObjects(context.Background(), bucketName, objectsCh, minio.RemoveObjectsOptions{})
+	for e := range errorCh {
+		klog.Errorf("Failed to remove object %q, error:%v", e.ObjectName, e.Err)
+	}
+	if len(errorCh) != 0 {
+		return fmt.Errorf("Failed to remove all objects of bucket %s", bucketName)
 	}
 
 	// ensure our prefix is also removed
 	return client.minio.RemoveObject(context.Background(), bucketName, fsPrefix, minio.RemoveObjectOptions{})
 }
 
-func (client *s3Client) setBucket(bucket *bucket) error {
+func (client *s3Client) metadataExist(bucketName string) bool {
+	listOpts := minio.ListObjectsOptions{
+		Recursive: false,
+		Prefix:    metadataName,
+	}
+	for objs := range client.minio.ListObjects(context.Background(), bucketName, listOpts) {
+		if objs.Err != nil {
+			return false
+		}
+		if objs.ContentType == "application/json" {
+			return true
+		}
+	}
+	return false
+}
+
+func (client *s3Client) writeMetadata(bucket *metadata) error {
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(bucket)
 	if err != nil {
 		return err
 	}
-	opts := minio.PutObjectOptions{ContentType: "application/json"}
+	opts := minio.PutObjectOptions{
+		ContentType: "application/json",
+	}
 	_, err = client.minio.PutObject(context.Background(), bucket.Name, metadataName, b, int64(b.Len()), opts)
 	return err
 }
 
-func (client *s3Client) getBucket(bucketName string) (*bucket, error) {
+func (client *s3Client) getMetadata(bucketName string) (*metadata, error) {
 	opts := minio.GetObjectOptions{}
 	obj, err := client.minio.GetObject(context.Background(), bucketName, metadataName, opts)
 	if err != nil {
@@ -187,7 +201,7 @@ func (client *s3Client) getBucket(bucketName string) (*bucket, error) {
 	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, err
 	}
-	var meta bucket
+	var meta metadata
 	err = json.Unmarshal(b, &meta)
 	return &meta, err
 }

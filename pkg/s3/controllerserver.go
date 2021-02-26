@@ -57,45 +57,12 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 	}
 
 	capacityBytes := int64(req.GetCapacityRange().GetRequiredBytes())
-	params := req.GetParameters()
-	mounter := params[mounterTypeKey]
 
 	klog.Infof("Got a request to create volume %s", volumeID)
 
-	s3, err := newS3ClientFromSecrets(req.GetSecrets())
+	err := ensureBucketWithMetadata(volumeID, req.GetSecrets(), capacityBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
-	}
-	exists, err := s3.bucketExists(volumeID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check if bucket %s exists: %w", volumeID, err)
-	}
-	if exists {
-		var b *bucket
-		b, err = s3.getBucket(volumeID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get bucket metadata of bucket %s: %w", volumeID, err)
-		}
-		// Check if volume capacity requested is bigger than the already existing capacity
-		if capacityBytes > b.CapacityBytes {
-			return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Volume with the same name: %s but with smaller size already exist", volumeID))
-		}
-	} else {
-		if err = s3.createBucket(volumeID); err != nil {
-			return nil, fmt.Errorf("failed to create volume %s: %w", volumeID, err)
-		}
-		if err = s3.createPrefix(volumeID, fsPrefix); err != nil {
-			return nil, fmt.Errorf("failed to create prefix %s: %w", fsPrefix, err)
-		}
-		b := &bucket{
-			Name:          volumeID,
-			Mounter:       mounter,
-			CapacityBytes: capacityBytes,
-			FSPath:        fsPrefix,
-		}
-		if err := s3.setBucket(b); err != nil {
-			return nil, fmt.Errorf("Error setting bucket metadata: %w", err)
-		}
+		return nil, status.Errorf(codes.Internal, "cannot create backup and metadata:%v", err)
 	}
 	klog.Infof("create volume %s", volumeID)
 	return &csi.CreateVolumeResponse{
@@ -198,4 +165,52 @@ func sanitizeVolumeID(volumeID string) string {
 		volumeID = hex.EncodeToString(h.Sum(nil))
 	}
 	return volumeID
+}
+
+func ensureBucketWithMetadata(volumeID string, secrets map[string]string, capacityBytes int64) error {
+	s3, err := newS3ClientFromSecrets(secrets)
+	if err != nil {
+		return fmt.Errorf("failed to initialize S3 client: %w", err)
+	}
+	exists, err := s3.bucketExists(volumeID)
+	if err != nil {
+		return fmt.Errorf("failed to check if bucket %s exists: %w", volumeID, err)
+	}
+	if exists {
+		var meta *metadata
+		if !s3.metadataExist(volumeID) {
+			b := &metadata{
+				Name:          volumeID,
+				CapacityBytes: capacityBytes,
+				FSPath:        fsPrefix,
+			}
+			if err := s3.writeMetadata(b); err != nil {
+				return fmt.Errorf("Error setting volume metadata: %w", err)
+			}
+		}
+		meta, err = s3.getMetadata(volumeID)
+		if err != nil {
+			return fmt.Errorf("failed to get metadata of volume %s: %w", volumeID, err)
+		}
+		// Check if volume capacity requested is bigger than the already existing capacity
+		if capacityBytes > meta.CapacityBytes {
+			return status.Error(codes.AlreadyExists, fmt.Sprintf("Volume with the same name: %s but with smaller size already exist", volumeID))
+		}
+	} else {
+		if err = s3.createBucket(volumeID); err != nil {
+			return fmt.Errorf("failed to create bucket for volume %s: %w", volumeID, err)
+		}
+		if err = s3.createPrefix(volumeID, fsPrefix); err != nil {
+			return fmt.Errorf("failed to create prefix %s for volume %s: %w", fsPrefix, volumeID, err)
+		}
+		meta := &metadata{
+			Name:          volumeID,
+			CapacityBytes: capacityBytes,
+			FSPath:        fsPrefix,
+		}
+		if err := s3.writeMetadata(meta); err != nil {
+			return fmt.Errorf("Error setting volume metadata: %w", err)
+		}
+	}
+	return nil
 }
