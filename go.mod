@@ -13,6 +13,6 @@ require (
 	github.com/onsi/ginkgo v1.16.0
 	github.com/onsi/gomega v1.11.0
 	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7
-	google.golang.org/grpc v1.36.1
+	google.golang.org/grpc v1.37.0
 	k8s.io/klog/v2 v2.8.0
 )
