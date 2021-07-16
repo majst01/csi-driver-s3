@@ -13,5 +13,5 @@ require (
 	github.com/onsi/gomega v1.14.0
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	google.golang.org/grpc v1.39.0
-	k8s.io/klog/v2 v2.9.0
+	k8s.io/klog/v2 v2.10.0
 )
