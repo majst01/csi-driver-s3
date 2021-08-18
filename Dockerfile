@@ -1,6 +1,6 @@
-FROM alpine:3.13 AS s3fs-builder
+FROM alpine:3.14 AS s3fs-builder
 
-ARG S3FS_VERSION=v1.89
+ARG S3FS_VERSION=v1.90
 
 RUN apk --no-cache add \
         ca-certificates \
@@ -11,7 +11,6 @@ RUN apk --no-cache add \
         automake \
         autoconf \
         libxml2-dev \
-        libressl-dev \
         fuse-dev \
         curl-dev \
  && git clone https://github.com/s3fs-fuse/s3fs-fuse.git \
@@ -29,7 +28,7 @@ COPY / /work
 WORKDIR /work
 RUN make
 
-FROM alpine:3.13
+FROM alpine:3.14
 RUN apk --no-cache add \
     ca-certificates \
     fuse \
