@@ -8,7 +8,7 @@ require (
 	github.com/kubernetes-csi/csi-test v2.2.0+incompatible
 	github.com/kubernetes-csi/drivers v1.0.2
 	github.com/metal-stack/v v1.0.3
-	github.com/minio/minio-go/v7 v7.0.12
+	github.com/minio/minio-go/v7 v7.0.13
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.16.0
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
