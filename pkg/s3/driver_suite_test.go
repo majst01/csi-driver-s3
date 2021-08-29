@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/kubernetes-csi/csi-test/pkg/sanity"
+	"github.com/kubernetes-csi/csi-test/v4/pkg/sanity"
 )
 
 var _ = Describe("S3Driver", func() {
@@ -26,7 +26,7 @@ var _ = Describe("S3Driver", func() {
 		go driver.Run()
 
 		Describe("CSI sanity", func() {
-			sanityCfg := &sanity.Config{
+			sanityCfg := &sanity.TestConfig{
 				TargetPath:  os.TempDir() + "/s3fs-target",
 				StagingPath: os.TempDir() + "/s3fs-staging",
 				Address:     csiEndpoint,
