@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/container-storage-interface/spec v1.5.0
 	github.com/kubernetes-csi/csi-lib-utils v0.10.0 // indirect
-	github.com/kubernetes-csi/csi-test/v4 v4.2.0
+	github.com/kubernetes-csi/csi-test/v4 v4.3.0
 	github.com/kubernetes-csi/drivers v1.0.2
 	github.com/metal-stack/v v1.0.3
 	github.com/minio/minio-go/v7 v7.0.14
