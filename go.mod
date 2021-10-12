@@ -9,7 +9,7 @@ require (
 	github.com/kubernetes-csi/drivers v1.0.2
 	github.com/metal-stack/v v1.0.3
 	github.com/minio/minio-go/v7 v7.0.14
-	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.16.0
 	golang.org/x/net v0.0.0-20210825183410-e898025ed96a
 	google.golang.org/grpc v1.41.0
