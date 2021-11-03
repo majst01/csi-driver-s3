@@ -86,8 +86,14 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 		targetPath, deviceID, readOnly, volumeID, attrib, mountFlags)
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
+	bucketName := *s3.bucketName
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
+	}
+	if len(bucketName) != 0 {
+		volumeID = bucketName
+	} else {
+		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
 	}
 	meta, err := s3.getMetadata(volumeID)
 	if err != nil {
@@ -150,8 +156,14 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 		return nil, status.Error(codes.Internal, fmt.Sprintf("unable to create mkdir directory for %q err:%v", stagingTargetPath, err))
 	}
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
+	bucketName := *s3.bucketName
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize s3 client: %w", err)
+	}
+	if len(bucketName) != 0 {
+		volumeID = bucketName
+	} else {
+		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
 	}
 	meta, err := s3.getMetadata(volumeID)
 	if err != nil {

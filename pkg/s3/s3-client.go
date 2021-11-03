@@ -20,8 +20,9 @@ const (
 )
 
 type s3Client struct {
-	cfg   *Config
-	minio *minio.Client
+	cfg        *Config
+	minio      *minio.Client
+	bucketName *string
 }
 
 type metadata struct {
@@ -57,6 +58,7 @@ func newS3Client(cfg *Config) (*s3Client, error) {
 		return nil, err
 	}
 	client.minio = minioClient
+	client.bucketName = &cfg.BucketName
 	return client, nil
 }
 
@@ -64,6 +66,7 @@ func newS3ClientFromSecrets(secrets map[string]string) (*s3Client, error) {
 	return newS3Client(&Config{
 		AccessKeyID:     secrets["accessKeyID"],
 		SecretAccessKey: secrets["secretAccessKey"],
+		BucketName:      secrets["bucketName"],
 		Region:          secrets["region"],
 		Endpoint:        secrets["endpoint"],
 		// Mounter is set in the volume preferences, not secrets

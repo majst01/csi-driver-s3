@@ -4,6 +4,7 @@ package s3
 type Config struct {
 	AccessKeyID     string
 	SecretAccessKey string
+	BucketName      string
 	Region          string
 	Endpoint        string
 	Mounter         string
