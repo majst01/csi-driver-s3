@@ -42,7 +42,10 @@ func (cs *controllerServer) ControllerGetVolume(ctx context.Context, req *csi.Co
 
 func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest) (*csi.CreateVolumeResponse, error) {
 	s3, _ := newS3ClientFromSecrets(req.GetSecrets())
-	bucketName := *s3.bucketName
+	bucketName := ""
+	if s3 != nil {
+		bucketName = *s3.bucketName
+	}
 	volumeID := req.GetName()
 
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {
@@ -51,12 +54,13 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 	}
 
 	// Check arguments
-	if len(bucketName) != 0 {
+	if bucketName != "" {
 		volumeID = bucketName
-	} else if len(volumeID) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Name missing in request")
 	} else {
 		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
+	}
+	if len(volumeID) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "Name missing in request")
 	}
 	if req.GetVolumeCapabilities() == nil {
 		return nil, status.Error(codes.InvalidArgument, "Volume Capabilities missing in request")
@@ -82,16 +86,20 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 
 func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
-	bucketName := *s3.bucketName
+	bucketName := ""
+	if s3 != nil {
+		bucketName = *s3.bucketName
+	}
 	volumeID := req.GetVolumeId()
 
 	// Check arguments
-	if len(bucketName) != 0 {
+	if bucketName != "" {
 		volumeID = bucketName
-	} else if len(volumeID) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
 	} else {
 		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
+	}
+	if len(volumeID) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
 	}
 
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {
