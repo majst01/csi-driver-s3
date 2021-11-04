@@ -152,7 +152,7 @@ func (client *s3Client) emptyBucket(bucketName string) error {
 		klog.Errorf("Failed to remove object %q, error:%v", e.ObjectName, e.Err)
 	}
 	if len(errorCh) != 0 {
-		return fmt.Errorf("Failed to remove all objects of bucket %s", bucketName)
+		return fmt.Errorf("failed to remove all objects of bucket %s", bucketName)
 	}
 
 	// ensure our prefix is also removed

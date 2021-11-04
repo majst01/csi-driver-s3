@@ -41,12 +41,15 @@ func (cs *controllerServer) ControllerGetVolume(ctx context.Context, req *csi.Co
 }
 
 func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest) (*csi.CreateVolumeResponse, error) {
-	s3, _ := newS3ClientFromSecrets(req.GetSecrets())
+	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	bucketName := ""
 	if s3 != nil {
 		bucketName = *s3.bucketName
 	}
-	volumeID := req.GetName()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
+	}
+	volumeID := ""
 
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {
 		klog.Infof("invalid create volume req: %v", req)
@@ -60,6 +63,8 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
 	}
 	if len(volumeID) == 0 {
+		volumeID = req.GetName()
+	} else {
 		return nil, status.Error(codes.InvalidArgument, "Name missing in request")
 	}
 	if req.GetVolumeCapabilities() == nil {
@@ -90,7 +95,10 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 	if s3 != nil {
 		bucketName = *s3.bucketName
 	}
-	volumeID := req.GetVolumeId()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
+	}
+	volumeID := ""
 
 	// Check arguments
 	if bucketName != "" {
@@ -99,6 +107,8 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
 	}
 	if len(volumeID) == 0 {
+		volumeID = req.GetVolumeId()
+	} else {
 		return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
 	}
 
@@ -108,9 +118,6 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 	}
 	klog.Infof("Deleting volume %s", volumeID)
 
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
-	}
 	exists, err := s3.bucketExists(volumeID)
 	if err != nil {
 		return nil, err
@@ -204,7 +211,7 @@ func ensureBucketWithMetadata(volumeID string, secrets map[string]string, capaci
 				FSPath:        fsPrefix,
 			}
 			if err := s3.writeMetadata(b); err != nil {
-				return fmt.Errorf("Error setting volume metadata: %w", err)
+				return fmt.Errorf("error setting volume metadata: %w", err)
 			}
 		}
 		meta, err = s3.getMetadata(volumeID)
@@ -228,7 +235,7 @@ func ensureBucketWithMetadata(volumeID string, secrets map[string]string, capaci
 			FSPath:        fsPrefix,
 		}
 		if err := s3.writeMetadata(meta); err != nil {
-			return fmt.Errorf("Error setting volume metadata: %w", err)
+			return fmt.Errorf("error setting volume metadata: %w", err)
 		}
 	}
 	return nil
