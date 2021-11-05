@@ -43,39 +43,37 @@ func (cs *controllerServer) ControllerGetVolume(ctx context.Context, req *csi.Co
 func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest) (*csi.CreateVolumeResponse, error) {
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	bucketName := ""
-	if s3 != nil {
+	if s3 != nil && s3.bucketName != nil {
 		bucketName = *s3.bucketName
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
 	}
-	volumeID := ""
 
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {
 		klog.Infof("invalid create volume req: %v", req)
 		return nil, err
 	}
 
+	volumeID := ""
 	// Check arguments
 	if bucketName != "" {
 		volumeID = bucketName
-	} else {
-		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
 	}
 	if len(volumeID) == 0 {
 		volumeID = req.GetName()
 	} else {
-		return nil, status.Error(codes.InvalidArgument, "Name missing in request")
+		return nil, status.Error(codes.InvalidArgument, "name missing in request")
 	}
 	if req.GetVolumeCapabilities() == nil {
-		return nil, status.Error(codes.InvalidArgument, "Volume Capabilities missing in request")
+		return nil, status.Error(codes.InvalidArgument, "volume Capabilities missing in request")
 	}
 
 	capacityBytes := int64(req.GetCapacityRange().GetRequiredBytes())
 
 	klog.Infof("Got a request to create volume %s", volumeID)
 
-	err := ensureBucketWithMetadata(volumeID, req.GetSecrets(), capacityBytes)
+	err = ensureBucketWithMetadata(volumeID, req.GetSecrets(), capacityBytes)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "cannot create backup and metadata:%v", err)
 	}
@@ -92,7 +90,7 @@ func (cs *controllerServer) CreateVolume(ctx context.Context, req *csi.CreateVol
 func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	bucketName := ""
-	if s3 != nil {
+	if s3 != nil && s3.bucketName != nil {
 		bucketName = *s3.bucketName
 	}
 	if err != nil {
@@ -104,12 +102,12 @@ func (cs *controllerServer) DeleteVolume(ctx context.Context, req *csi.DeleteVol
 	if bucketName != "" {
 		volumeID = bucketName
 	} else {
-		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
+		return nil, status.Error(codes.InvalidArgument, "bucket Name missing in request")
 	}
 	if len(volumeID) == 0 {
 		volumeID = req.GetVolumeId()
 	} else {
-		return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
+		return nil, status.Error(codes.InvalidArgument, "volume ID missing in request")
 	}
 
 	if err := cs.Driver.ValidateControllerServiceRequest(csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME); err != nil {

@@ -143,13 +143,13 @@ func (client *s3Client) emptyBucket(bucketName string) error {
 	}()
 
 	if listErr != nil {
-		klog.Errorf("Error listing objects:%v", listErr)
+		klog.Errorf("error listing objects:%v", listErr)
 		return listErr
 	}
 
 	errorCh := client.minio.RemoveObjects(context.Background(), bucketName, objectsCh, minio.RemoveObjectsOptions{})
 	for e := range errorCh {
-		klog.Errorf("Failed to remove object %q, error:%v", e.ObjectName, e.Err)
+		klog.Errorf("failed to remove object %q, error:%v", e.ObjectName, e.Err)
 	}
 	if len(errorCh) != 0 {
 		return fmt.Errorf("failed to remove all objects of bucket %s", bucketName)

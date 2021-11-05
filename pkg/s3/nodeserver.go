@@ -43,16 +43,16 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 
 	// Check arguments
 	if req.GetVolumeCapability() == nil {
-		return nil, status.Error(codes.InvalidArgument, "Volume capability missing in request")
+		return nil, status.Error(codes.InvalidArgument, "volume capability missing in request")
 	}
 	if len(volumeID) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
+		return nil, status.Error(codes.InvalidArgument, "volume ID missing in request")
 	}
 	if len(stagingTargetPath) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Staging Target path missing in request")
+		return nil, status.Error(codes.InvalidArgument, "staging Target path missing in request")
 	}
 	if len(targetPath) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Target path missing in request")
+		return nil, status.Error(codes.InvalidArgument, "target path missing in request")
 	}
 
 	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
@@ -87,7 +87,7 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	bucketName := ""
-	if s3 != nil {
+	if s3 != nil && s3.bucketName != nil {
 		bucketName = *s3.bucketName
 	}
 	if err != nil {
@@ -96,7 +96,7 @@ func (ns *nodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 	if bucketName != "" {
 		volumeID = bucketName
 	} else {
-		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
+		return nil, status.Error(codes.InvalidArgument, "bucket Name missing in request")
 	}
 	meta, err := s3.getMetadata(volumeID)
 	if err != nil {
@@ -120,10 +120,10 @@ func (ns *nodeServer) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpu
 
 	// Check arguments
 	if len(volumeID) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
+		return nil, status.Error(codes.InvalidArgument, "volume ID missing in request")
 	}
 	if len(targetPath) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Target path missing in request")
+		return nil, status.Error(codes.InvalidArgument, "target path missing in request")
 	}
 
 	cmd := exec.Command("umount", "--lazy", "--force", targetPath)
@@ -143,15 +143,15 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 
 	// Check arguments
 	if len(volumeID) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
+		return nil, status.Error(codes.InvalidArgument, "volume ID missing in request")
 	}
 
 	if len(stagingTargetPath) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Target path missing in request")
+		return nil, status.Error(codes.InvalidArgument, "target path missing in request")
 	}
 
 	if req.VolumeCapability == nil {
-		return nil, status.Error(codes.InvalidArgument, "NodeStageVolume Volume Capability must be provided")
+		return nil, status.Error(codes.InvalidArgument, "nodeStageVolume Volume Capability must be provided")
 	}
 
 	err := os.MkdirAll(stagingTargetPath, 0777)
@@ -160,7 +160,7 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 	}
 	s3, err := newS3ClientFromSecrets(req.GetSecrets())
 	bucketName := ""
-	if s3 != nil {
+	if s3 != nil && s3.bucketName != nil {
 		bucketName = *s3.bucketName
 	}
 	if err != nil {
@@ -169,7 +169,7 @@ func (ns *nodeServer) NodeStageVolume(ctx context.Context, req *csi.NodeStageVol
 	if bucketName != "" {
 		volumeID = bucketName
 	} else {
-		return nil, status.Error(codes.InvalidArgument, "Bucket Name missing in request")
+		return nil, status.Error(codes.InvalidArgument, "bucket Name missing in request")
 	}
 	meta, err := s3.getMetadata(volumeID)
 	if err != nil {
@@ -190,10 +190,10 @@ func (ns *nodeServer) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstag
 
 	// Check arguments
 	if len(volumeID) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Volume ID missing in request")
+		return nil, status.Error(codes.InvalidArgument, "volume ID missing in request")
 	}
 	if len(stagingTargetPath) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "Target path missing in request")
+		return nil, status.Error(codes.InvalidArgument, "target path missing in request")
 	}
 
 	return &csi.NodeUnstageVolumeResponse{}, nil
@@ -218,5 +218,5 @@ func (ns *nodeServer) NodeGetCapabilities(ctx context.Context, req *csi.NodeGetC
 }
 
 func (ns *nodeServer) NodeExpandVolume(ctx context.Context, req *csi.NodeExpandVolumeRequest) (*csi.NodeExpandVolumeResponse, error) {
-	return &csi.NodeExpandVolumeResponse{}, status.Error(codes.Unimplemented, "NodeExpandVolume is not implemented")
+	return &csi.NodeExpandVolumeResponse{}, status.Error(codes.Unimplemented, "nodeExpandVolume is not implemented")
 }
