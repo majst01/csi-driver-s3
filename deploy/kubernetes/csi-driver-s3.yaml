@@ -82,7 +82,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: majst01/csi-driver-s3:v0.3.3
+          image: majst01/csi-driver-s3:v0.3.4
           args:
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--nodeid=$(NODE_ID)"
