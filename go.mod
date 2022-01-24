@@ -9,7 +9,7 @@ require (
 	github.com/metal-stack/v v1.0.3
 	github.com/minio/minio-go/v7 v7.0.21
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.17.0
+	github.com/onsi/gomega v1.18.0
 	golang.org/x/net v0.0.0-20211208012354-db4efeb81f4b
 	google.golang.org/grpc v1.43.0
 	k8s.io/klog/v2 v2.40.1
@@ -35,7 +35,7 @@ require (
 	github.com/rs/xid v1.2.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83 // indirect
-	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
