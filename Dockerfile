@@ -1,6 +1,6 @@
-FROM alpine:3.15 AS s3fs-builder
+FROM alpine:3.16 AS s3fs-builder
 
-ARG S3FS_VERSION=v1.90
+ARG S3FS_VERSION=v1.91
 
 RUN apk --no-cache add \
         ca-certificates \
@@ -22,13 +22,13 @@ RUN apk --no-cache add \
  && make install \
  && strip /usr/bin/s3fs
 
-FROM golang:1.17-alpine as builder
+FROM golang:1.19-alpine as builder
 RUN apk add git make binutils
 COPY / /work
 WORKDIR /work
 RUN make
 
-FROM alpine:3.15
+FROM alpine:3.16
 RUN apk --no-cache add \
     ca-certificates \
     fuse \
