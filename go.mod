@@ -3,7 +3,7 @@ module github.com/majst01/csi-driver-s3
 go 1.19
 
 require (
-	github.com/container-storage-interface/spec v1.7.0
+	github.com/container-storage-interface/spec v1.8.0
 	github.com/kubernetes-csi/csi-test/v4 v4.4.0
 	github.com/kubernetes-csi/drivers v1.0.2
 	github.com/metal-stack/v v1.0.3
