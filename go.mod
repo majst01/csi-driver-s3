@@ -9,7 +9,7 @@ require (
 	github.com/metal-stack/v v1.0.3
 	github.com/minio/minio-go/v7 v7.0.49
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.27.2
+	github.com/onsi/gomega v1.27.3
 	golang.org/x/net v0.8.0
 	google.golang.org/grpc v1.53.0
 	k8s.io/klog/v2 v2.90.1
@@ -20,7 +20,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/golang/glog v1.0.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
