@@ -12,7 +12,7 @@ require (
 	github.com/onsi/gomega v1.27.6
 	golang.org/x/net v0.8.0
 	google.golang.org/grpc v1.54.0
-	k8s.io/klog/v2 v2.90.1
+	k8s.io/klog/v2 v2.100.1
 )
 
 require (
