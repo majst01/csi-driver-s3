@@ -10,7 +10,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.56
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.7
-	golang.org/x/net v0.10.0
+	golang.org/x/net v0.11.0
 	google.golang.org/grpc v1.55.0
 	k8s.io/klog/v2 v2.100.1
 )
@@ -34,9 +34,9 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/sirupsen/logrus v1.9.2 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/crypto v0.10.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/text v0.10.0 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
