@@ -29,7 +29,7 @@ build: bin/s3driver
 
 bin/s3driver: pkg/s3/*.go cmd/s3driver/*.go
 	CGO_ENABLED=0 GOOS=linux \
-	go build -a -ldflags "-extldflags '-static' \
+	go build -a -trimpath -ldflags "-extldflags '-static' \
                           -X 'github.com/metal-stack/v.Version=$(VERSION)' \
                           -X 'github.com/metal-stack/v.Revision=$(GITVERSION)' \
                           -X 'github.com/metal-stack/v.GitSHA1=$(SHA)' \
