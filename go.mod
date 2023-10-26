@@ -9,7 +9,7 @@ require (
 	github.com/metal-stack/v v1.0.3
 	github.com/minio/minio-go/v7 v7.0.59
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.28.1
+	github.com/onsi/gomega v1.29.0
 	golang.org/x/net v0.17.0
 	google.golang.org/grpc v1.56.2
 	k8s.io/klog/v2 v2.100.1
