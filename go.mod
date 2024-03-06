@@ -11,7 +11,7 @@ require (
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.31.0
 	golang.org/x/net v0.21.0
-	google.golang.org/grpc v1.62.0
+	google.golang.org/grpc v1.62.1
 	k8s.io/klog/v2 v2.120.0
 )
 
